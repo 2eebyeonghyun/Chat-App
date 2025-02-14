@@ -66,6 +66,16 @@ function VideoLoading({ src, isPlaying }) {
     //  -> 원하는 동작이 아닐 경우가 발생
     //     1. 잘못되는건 둘째치고 성능상 불리할 수 있다.( 느릴수 있다.)
     //     2. 원하지 않은 이벤트 발생 가능성
+
+    // useRef는 DOM 직접 접근도 가능한데 그렇다면 종속성을 ref에 걸어도
+    // 되는거 아니었을까?
+    // ref객체의 경우는 항상 동일한 객체를 얻을것을 보장받는 특성이 있음
+    //  -> 이 녀석은 '절대' 변하지 않을것
+    // 물론 추가한다면 좀 더 안정적으로 해당 내용을 식별할 수 있는건 맞음
+    //  -> 하지만 state의 set함수들 또한 안정적으로 해당 내용을 식별할 수 있어서
+    //     종속성에서 생략을 해도 상관없다.
+    //  -> 만약 제대로 객체를 찾을 수 없는 경우에만 ref를 종속성 배열에 추가하는것을
+    //     고려해봄직하다.
     useEffect(() => {
         
         if (isPlaying) {
@@ -75,7 +85,7 @@ function VideoLoading({ src, isPlaying }) {
             console.log('일시 정지');
             ref.current.pause();
         }
-    }, [isPlaying]);
+    }, [isPlaying, ref]);
     // []의 의미 : 종속성 선언( dependency array)
     // 위의 effect는 isPlaying 상태를 기준으로 코드의 실행 유무를 결정
     //  -> effect에서는 해당 상태에 대한 종속성을 지정할 수 있다.
@@ -84,6 +94,12 @@ function VideoLoading({ src, isPlaying }) {
   
     // 주의사항 : 종속성으로 지정한 것이 예상과 다를 경우 에러가 발생할 수 있다.
     //  -> 종속성 지정에 대해 복잡해질수록 많은 고민이 필요
+
+    // ref를 그렇다면 꼭 써야할 때는?
+    //  -> ref가 부모 컴퍼넌트에 선언되어있으면 꼭 써줘야한다.
+    //  -> ref는 간단히 얘기하자면 같은 내용이 오는가 아닌가를 체크
+    //  -> 해당 컴포넌트에 ref가 선언되어 있으면 생략이 가능한 이유
+    //  -> ref를 통해 부모 컴포넌트로부터 전달된 조건이 맞는지 아닌지를 확인
 
     return <video ref={ref} src={src} loop playsInline />;
 }

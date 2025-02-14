@@ -7,6 +7,7 @@
 // npm i --save react-typing-animation
 
 import React, { useState, useEffect } from "react";
+// import Typing from "react-typing-animation";
 import './app.css';
 import './style.css';
 import MessageList from './MessageList';
@@ -29,7 +30,7 @@ const App = () => {
     // AI가 답변한 영역을 추적하기 위해 준비한 state
     //  -> currentTypingId : 다음으로 타이핑이 필요한 메세지를 찾기위해
     //                       현재 타이핑중인 메세지를 확인하는 상태 변수
-    const [currentTypingId, setCurrentTypingId] = useState('');
+    const [currentTypingId, setCurrentTypingId] = useState(null);
 
     // setMessages((prevMessages) => [
     //     ...prevMessages,
@@ -73,7 +74,7 @@ const App = () => {
         setMessages((prevMessages) => 
             prevMessages.map((msg) => msg.id === id ? {...msg, isTyping: false} : msg)
         );
-        setCurrentTypingId('');
+        setCurrentTypingId(null);
     };
 
 
@@ -91,8 +92,41 @@ const App = () => {
 
     // 아래의 예시는 이벤트와 effect를 분리하여 처리하는 case
     useEffect(() => {
+        // ai가 입력하는것처럼 이벤트 만들거임
+        // ai가 입력하는 이벤트는 모든 창에 적용인가?
+        //  -> user가 입력한 내용은 바론 랜더링하고
+        //  -> ai가 입력한 내용만 텍스트 효과를 부여한다.
 
-    });
+        // ai가 어떻게 입력했는냐 아니냐를 구분할까?
+        if(currentTypingId === null) { // 현재 타이핑중인 메세지가 있는가 없는가를 확인
+            // 어쨌든 user는 채팅을 입력할 것임
+            // 입력한 채팅은 화면에 랜더링 되어야한다.
+            // user와 ai의 채팅내용이 각자 따로 따로 한번씩 불러와지는가?
+            // 같이 랜더링되기 때문에 
+            // 우선 user/ ai의 채팅내용을 구분하고자 처리
+
+            // 우선 user의 내용을 처리
+            // messages배열( 상태)에는 입력한 내용들이 들어가 있을 것
+            //  -> 단순히 방금 입력한 내용만 있는것이 아니라 
+            //     이전에 입력했던 내용들도 보관하고 있다.
+            const nextTypingMessage = messages.find((msg) => 
+                // isUser가 false라는 얘기는 무슨뜻인가?
+                // isUser = false: AI 
+                // isUser = true: 일반유저 
+                // ai가 입력한 내용이면서( ai로 부터 온 메세지면서)
+                //  -> 현재 타이핑중인 메세지를 찾는 조건
+                // isUser -> false isTyping -> true;
+                // ai가 현재 입력중인 라인을 찾아가서 이벤트를 부여할 수 있다.
+                !msg.isUser && msg.isTyping
+            );
+
+            if(nextTypingMessage) { // 그렇다라면 랜더링을 한다해도
+                                    // 조건의 상태가 true가 아니라면 ai에 이벤트를 줄 수 없음
+                setCurrentTypingId(nextTypingMessage.id);
+            }
+        }
+
+    }, [messages, currentTypingId]); // 종속성 배열 선언
 
 
     return(
